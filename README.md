@@ -22,9 +22,11 @@
 🔧 **MCP Integration**
 - Claude Desktop stdio interface ✅
 - FastAPI HTTP API for web integration ✅
-- FastMCP 2.12 compliance ✅
+- **FastMCP 3.1** — sampling (server-side Ollama/OpenAI-compatible or client LLM), **prompts**, bundled **skills** (`skill://music-generation/SKILL.md`), **agentic_suno_workflow** (SEP-1577) ✅
 - Comprehensive error handling ✅
 - Production-ready logging ✅
+
+**Sampling env:** `SUNO_SAMPLING_BASE_URL` (default `http://127.0.0.1:11434/v1`), `SUNO_SAMPLING_MODEL`, optional `SUNO_SAMPLING_API_KEY`; `SUNO_SAMPLING_USE_CLIENT_LLM=1` to prefer the host LLM; `SUNO_SAMPLING_USE_OPENAI_KEY=1` uses `OPENAI_API_KEY` for cloud endpoints.
 
 ### 🎵 **Perfect For:**
 - **Claude Desktop integration** - "Generate a rock song about adventure"
@@ -48,8 +50,28 @@
 - "Make a chill electronic track with atmospheric pads"
 - "Generate hip-hop beats with motivational lyrics"
 
-## Installation
+## 🚀 Installation
 
+### Prerequisites
+- [uv](https://docs.astral.sh/uv/) installed (RECOMMENDED)
+- Python 3.12+
+
+### 📦 Quick Start
+Run immediately via `uvx`:
+```bash
+uvx suno-mcp
+```
+
+### 🎯 Claude Desktop Integration
+Add to your `claude_desktop_config.json`:
+```json
+"mcpServers": {
+  "suno-mcp": {
+    "command": "uv",
+    "args": ["--directory", "D:/Dev/repos/suno-mcp", "run", "suno-mcp"]
+  }
+}
+```
 ### Prerequisites
 - Python 3.10+ installed
 - Claude Desktop with MCP support
@@ -61,7 +83,7 @@
 1. **Install Dependencies**
 ```bash
 cd D:\Dev\repos\suno-mcp
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 2. **Install Playwright Browsers**

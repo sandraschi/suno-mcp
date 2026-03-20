@@ -1,0 +1,38 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": ["sandraschi"],
+  "name": "suno-mcp",
+  "description": "Suno AI music generation platform integration. AI-powered music creation, audio synthesis, and studio tools for music production.",
+  "type": "mcp_server",
+  "status": "beta",
+  "framework": "FastMCP 2.13+",
+  "tools": 15,
+  "transport": ["stdio"],
+  "keywords": [
+    "suno",
+    "ai-music",
+    "music-generation",
+    "audio-synthesis",
+    "music-production",
+    "studio-tools",
+    "fastmcp"
+  ],
+  "features": {
+    "music_generation": {
+      "enabled": true,
+      "capabilities": ["text-to-music", "style-transfer", "remixing"]
+    },
+    "audio_processing": {
+      "enabled": true,
+      "features": ["synthesis", "effects", "mastering", "export"]
+    },
+    "studio_integration": {
+      "enabled": true,
+      "tools": ["playwright-automation", "cost-optimization", "batch-processing"]
+    },
+    "ai_daw": {
+      "enabled": true,
+      "architecture": ["modular-tools", "reconstructive-tools", "shared-utilities"]
+    }
+  }
+}

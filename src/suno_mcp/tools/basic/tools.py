@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -17,6 +18,11 @@ class BasicSunoTools:
     def __init__(self) -> None:
         self.browser_manager = BrowserManager()
         self.logger = logging.getLogger(__name__)
+        self.allow_programmatic_login = os.getenv(
+            "SUNO_ENABLE_PROGRAMMATIC_LOGIN", ""
+        ).lower() in ("1", "true", "yes")
+        self.create_url = "https://suno.com/create"
+        self.library_url = "https://suno.com/library"
 
     async def open_browser(self, headless: bool = True) -> str:
         """Open browser and navigate to Suno AI create page."""
@@ -24,7 +30,7 @@ class BasicSunoTools:
             components = await self.browser_manager.ensure_browser(headless)
             page = components["page"]
 
-            await page.goto("https://app.suno.ai/create/", wait_until="networkidle")
+            await page.goto(self.create_url, wait_until="networkidle")
             await page.wait_for_load_state("domcontentloaded")
 
             title = await page.title()
@@ -38,6 +44,12 @@ class BasicSunoTools:
 
     async def login(self, email: str, password: str) -> str:
         """Login to Suno AI account."""
+        if not self.allow_programmatic_login:
+            return (
+                "🔒 Programmatic login is currently disabled.\n"
+                "Use manual browser login and save/load session cookies instead.\n"
+                "Set SUNO_ENABLE_PROGRAMMATIC_LOGIN=1 to re-enable scripted login."
+            )
         try:
             components = await self.browser_manager.ensure_browser()
             page = components["page"]
@@ -127,7 +139,7 @@ class BasicSunoTools:
 
             # Ensure we're on the create page
             if not page.url or "/create" not in page.url:
-                await page.goto("https://app.suno.ai/create/", wait_until="networkidle")
+                await page.goto(self.create_url, wait_until="networkidle")
                 await page.wait_for_load_state("domcontentloaded")
 
             # Wait for the form to be ready
@@ -231,7 +243,7 @@ class BasicSunoTools:
 
             # Navigate to library if not already there
             if not page.url or "/library" not in page.url:
-                await page.goto("https://app.suno.ai/library/", wait_until="networkidle")
+                await page.goto(self.library_url, wait_until="networkidle")
                 await page.wait_for_load_state("domcontentloaded")
                 await asyncio.sleep(2)
 

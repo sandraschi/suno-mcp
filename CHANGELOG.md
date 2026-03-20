@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-03-20
+
+### Added
+- **FastMCP 3.1**: `from fastmcp import FastMCP` with `instructions`, lifespan, `on_duplicate="replace"`.
+- **Sampling**: `SunoSamplingHandler` — OpenAI-compatible chat/completions (default local Ollama); env `SUNO_SAMPLING_*`, `SUNO_SAMPLING_USE_CLIENT_LLM`.
+- **Prompts**: `prompt://suno/generation-guide`, `session-workflow`, `recon-workflow`, `agentic-instructions`.
+- **Skills**: `SkillsDirectoryProvider` — bundled `skills/music-generation/SKILL.md` (`skill://music-generation/SKILL.md`).
+- **Agentic workflow**: `agentic_suno_workflow` (SEP-1577) — `context.sample_step` loop with selected tools.
+- **Resource**: `resource://suno/capabilities`.
+- **Dependencies**: `httpx` (sampling HTTP), `fastmcp>=3.1.0,<4`.
+
+### Fixed
+- **Entry points**: `main()` now passes `mcp_app` to `run_server` (was incorrectly passing `get_server_status`). `main_api()` uses `uvicorn.run(fastapi_app, ...)` instead of misusing `run_server`.
+
+### Changed
+- Version 1.2.0 across package, FastAPI, and help text; tool count includes `agentic_suno_workflow` (17 tools).
+
+## [1.1.0] - 2025-11-28
+
+### Added
+- **Reconnaissance Tools (7 new tools)**: DOM analysis for Studio automation development
+  - `recon_start_session(headless)` - Start visible browser for manual Suno login
+  - `recon_capture_dom(save_html, save_json)` - Capture Studio DOM structure
+  - `recon_find_elements()` - Map interactive UI elements with stable selectors
+  - `recon_save_cookies(filename)` - Preserve authenticated session
+  - `recon_load_cookies(filename)` - Restore session without re-login
+  - `recon_screenshot(filename)` - Visual documentation capture
+  - `recon_close_session()` - Clean browser shutdown
+
+### Features
+- **DOM Analysis**: Automatic extraction of buttons, inputs, sliders, timeline elements
+- **Selector Priority**: Prefers data-testid > id > aria-label > text > class
+- **Cookie Persistence**: Save/restore auth sessions for headless automation
+- **Element Mapping**: JSON export of interactive elements with suggested selectors
+- **Screenshot Capture**: Full-page screenshots for visual reference
+
+### Technical
+- New `tools/recon/` module with `ReconTools` class
+- Updated server.py with 7 new MCP tool registrations
+- Added FastAPI routing for recon tools (`_handle_recon_tool`)
+- Output directory: `recon_output/` for all captured data
+- Added fastapi and uvicorn to dependencies
+
+### Changed
+- Version bump to 1.1.0
+- Updated help system with recon tool documentation
+- Tool count updated: 16 total (6 basic + 7 recon + 3 system)
+
+---
+
 ## [1.0.0] - 2025-01-27
 
 ### Added

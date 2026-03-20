@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "suno-mcp"
-version = "1.0.0"
-description = "MCP Server for automated Suno AI music generation"
+version = "1.2.0"
+description = "MCP Server for automated Suno AI music generation with Studio reconnaissance"
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [
     {name = "Sandra Schipal", email = "sandra@example.com"},
 ]
@@ -30,9 +30,14 @@ classifiers = [
 ]
 dependencies = [
     "mcp>=1.0.0",
+    "httpx>=0.27.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
     "playwright>=1.40.0",
     "pydantic>=2.0.0",
-    "uvloop>=0.17.0; sys_platform != 'win32'",
+    "uvloop>=0.17.0 ; sys_platform != 'win32'",
+    "fastmcp>=3.1.0,<4.0.0",
+    "ruff>=0.15.2",
 ]
 
 [project.optional-dependencies]
@@ -68,7 +73,7 @@ zip-safe = false
 where = ["src"]
 
 [tool.setuptools.package-data]
-suno_mcp = ["py.typed"]
+suno_mcp = ["py.typed", "skills/**/*.md"]
 
 [tool.black]
 line-length = 88
@@ -118,6 +123,8 @@ ignore_missing_imports = true
 [tool.ruff]
 target-version = "py310"
 line-length = 88
+
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -133,7 +140,7 @@ ignore = [
     "C901",  # too complex
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "tests/**/*" = ["B011"]
 
