@@ -21,14 +21,14 @@ from typing import Any, Dict, List, Optional
 from playwright.async_api import Page
 
 from ..shared.exceptions import BrowserError, SunoError
-from ..shared.utils import BrowserManager, SelectorHelper
+from ..shared.utils import SelectorHelper, get_shared_browser_manager
 
 
 class ReconTools:
     """Reconnaissance tools for Suno Studio DOM mapping."""
 
     def __init__(self) -> None:
-        self.browser_manager = BrowserManager()
+        self.browser_manager = get_shared_browser_manager()
         self.logger = logging.getLogger(__name__)
         self.recon_dir = Path("recon_output")
         self.recon_dir.mkdir(exist_ok=True)
@@ -218,6 +218,65 @@ Use `find_interactive_elements()` for detailed element mapping.
         except Exception as e:
             self.logger.error(f"DOM capture failed: {e}")
             raise SunoError(f"DOM capture failed: {str(e)}", "DOM_CAPTURE_ERROR")
+
+    async def capture_current_page_dom(
+        self,
+        save_html: bool = True,
+        save_json: bool = True,
+    ) -> str:
+        """
+        Capture DOM for whatever URL the shared Playwright page is on (create, studio, library, etc.).
+
+        Unlike ``capture_studio_dom``, does **not** require ``/studio`` in the URL—use this from the
+        webapp "Analyze" flow or MCP when you are already navigated to the right screen.
+        """
+        try:
+            components = await self.browser_manager.ensure_browser()
+            page = components["page"]
+            current_url = page.url or ""
+
+            if not current_url or current_url.startswith("about:"):
+                return (
+                    "⚠️ **No page loaded.** Start a session first (`suno_open_browser`, `recon_start_session`, "
+                    "or any tool that opens the browser), navigate to Suno, then run capture again."
+                )
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            html_content = await page.content()
+
+            html_path = None
+            json_path = None
+            if save_html:
+                html_path = self.recon_dir / f"page_dom_{timestamp}.html"
+                html_path.write_text(html_content, encoding="utf-8")
+
+            analysis = await self._analyze_dom(page)
+
+            if save_json:
+                json_path = self.recon_dir / f"page_analysis_{timestamp}.json"
+                json_path.write_text(json.dumps(analysis, indent=2), encoding="utf-8")
+
+            summary = self._generate_summary(analysis)
+
+            return f"""🔍 **Page DOM captured**
+
+**URL:** {current_url}
+**Timestamp:** {timestamp}
+
+**Files saved:**
+{"• HTML: " + str(html_path.resolve()) if html_path else ""}
+{"• JSON: " + str(json_path.resolve()) if json_path else ""}
+
+**Element summary:**
+{summary}
+
+**Counts:** buttons={len(analysis.get("buttons", []))}, inputs={len(analysis.get("inputs", []))}, sliders={len(analysis.get("sliders", []))}
+
+Use `recon_find_elements` (or the webapp) for a selector-oriented map. Same files are readable from MCP on this host (`recon_output/`).
+"""
+        except Exception as e:
+            self.logger.error(f"Page DOM capture failed: {e}")
+            raise SunoError(f"Page DOM capture failed: {str(e)}", "PAGE_DOM_CAPTURE_ERROR")
 
     async def periodic_dom_snapshots(
         self,

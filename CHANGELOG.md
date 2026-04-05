@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Shared Playwright session:** `suno_*` and `recon_*` tools now use one `BrowserManager` via `get_shared_browser_manager()` so human-in-the-loop uses a single Chromium window instead of two independent instances.
+
+### Documentation
+- README: clarify what “human-in-the-loop” means (Playwright only), what MCP/FastAPI/web_sota actually do, and how to improve the stack.
+
+### Fixed
+- **web_sota:** Dashboard and Status pages now load **real** `GET /health` and `GET /api/v1/status` instead of hard-coded KPIs; added `src/lib/backend.ts`, `VITE_API_BASE_URL`, `src/vite-env.d.ts`. Build fixes (unused imports, `Music` icon).
+
+### Added
+- **`recon_capture_page` MCP tool** and **`capture_current_page_dom`** (any Suno URL, not only `/studio`).
+- **FastAPI:** `POST /api/v1/recon/capture-current`, `POST /api/v1/recon/find-elements`, `GET /api/v1/recon/output-dir`.
+- **web_sota:** `/recon` page with buttons to run capture + element map against the live Playwright session.
+- **HTTP tool executor:** `recon_close_session`, `recon_ensure_authenticated_session`, `recon_periodic_dom_snapshots` wired in `_handle_recon_tool` (were missing before).
+
 ## [1.2.0] - 2026-03-20
 
 ### Added

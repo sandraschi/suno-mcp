@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wrench, MusicalNote, Search, Zap } from "lucide-react";
+import { Wrench, Music, Search, Zap } from "lucide-react";
 
 export function Tools() {
     return (
@@ -33,7 +33,7 @@ export function Tools() {
                 <Card className="border-slate-800 bg-slate-950/50">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-slate-200">Help System</CardTitle>
-                        <MusicalNote className="h-4 w-4 text-purple-500" />
+                        <Music className="h-4 w-4 text-purple-500" />
                     </CardHeader>
                     <CardContent>
                         <p className="text-xs text-slate-400">Documentation and musical standards</p>

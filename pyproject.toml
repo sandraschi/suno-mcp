@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "suno-mcp"
 version = "1.2.0"
-description = "MCP Server for automated Suno AI music generation with Studio reconnaissance"
+description = "MCP server: Playwright automation against suno.com (fragile); DOM recon tools; no official Suno API"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.12"
@@ -120,30 +120,6 @@ show_error_codes = true
 module = ["playwright.*"]
 ignore_missing_imports = true
 
-[tool.ruff]
-target-version = "py310"
-line-length = 88
-
-[tool.ruff.lint]
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "I",  # isort
-    "B",  # flake8-bugbear
-    "C4", # flake8-comprehensions
-    "UP", # pyupgrade
-]
-ignore = [
-    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex
-]
-
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
-"tests/**/*" = ["B011"]
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
@@ -163,3 +139,32 @@ markers = [
     "integration: Integration tests",
     "slow: Slow tests",
 ]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# Hardened v13.1 Rule Set
+select = [
+    "E", "F", "I", "UP", "B", "S", "A", "ANN", "COM", "C4", "DTZ", "PIE", "T20", "PYI", "Q", "RSE", "RET", "SLF", "SIM", "TID", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "PERF", "FURB", "LOG", "RUF"
+]
+ignore = [
+    "ANN101", # Missing type annotation for self
+    "ANN102", # Missing type annotation for cls
+    "COM812", # Trailing comma missing (handled by formatter)
+    "ISC001", # Single line implicit string concatenation (handled by formatter)
+    "PLR0913", # Too many arguments
+    "S101",   # Use of assert (standard for pytest)
+    "TRY003", # Avoid specifying long messages in exceptions
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "ANN", "PLR", "TRY", "S105", "S106", "SLF001", "ARG002", "PLC0415"]
+"server.py" = ["T20", "ARG001", "ARG002"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

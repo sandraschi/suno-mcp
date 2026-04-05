@@ -9,14 +9,14 @@ from typing import Any, Dict, Optional
 from playwright.async_api import Browser, BrowserContext, Page, Playwright, async_playwright
 
 from ..shared.exceptions import BrowserError, SunoError
-from ..shared.utils import BrowserManager, SelectorHelper
+from ..shared.utils import SelectorHelper, get_shared_browser_manager
 
 
 class BasicSunoTools:
     """Basic Suno AI tools for music generation."""
 
     def __init__(self) -> None:
-        self.browser_manager = BrowserManager()
+        self.browser_manager = get_shared_browser_manager()
         self.logger = logging.getLogger(__name__)
         self.allow_programmatic_login = os.getenv(
             "SUNO_ENABLE_PROGRAMMATIC_LOGIN", ""

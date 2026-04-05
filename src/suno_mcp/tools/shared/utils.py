@@ -176,6 +176,18 @@ class BrowserManager:
             }
 
 
+_shared_browser_manager: Optional[BrowserManager] = None
+
+
+def get_shared_browser_manager() -> BrowserManager:
+    """Single Playwright Chromium session shared by suno_* and recon_* tools."""
+
+    global _shared_browser_manager
+    if _shared_browser_manager is None:
+        _shared_browser_manager = BrowserManager()
+    return _shared_browser_manager
+
+
 class ConfigManager:
     """Configuration management for the MCP server."""
 

@@ -18,6 +18,7 @@ from .sampling.suno_sampling_handler import SunoSamplingHandler
 from .tools.agentic_suno_workflow import register_agentic_suno_workflow
 from .tools.basic.tools import BasicSunoTools
 from .tools.recon.tools import ReconTools
+from .tools.shared.exceptions import SunoError
 from .transport import run_server
 
 _USE_CLIENT_SAMPLING = os.getenv("SUNO_SAMPLING_USE_CLIENT_LLM", "").lower() in (
@@ -50,6 +51,12 @@ class StatusResponse(BaseModel):
     page_title: str | None
     in_studio: bool
     server_mode: str
+
+
+class ReconTriggerResponse(BaseModel):
+    """Webapp / API trigger for recon on the shared Playwright page."""
+    success: bool
+    message: str
 
 
 # Global instances
@@ -186,7 +193,7 @@ async def health_check():
         status="ok",
         version="1.2.0",
         uptime=current_time - start_time,
-        tools_loaded=19,
+        tools_loaded=20,
     )
 
 
@@ -229,9 +236,16 @@ async def list_tools():
 
     # Recon tools
     recon_tool_names = [
-            "recon_start_session", "recon_capture_dom", "recon_find_elements",
-            "recon_save_cookies", "recon_load_cookies", "recon_screenshot",
-            "recon_ensure_authenticated_session", "recon_periodic_dom_snapshots", "recon_close"
+        "recon_start_session",
+        "recon_capture_dom",
+        "recon_capture_page",
+        "recon_find_elements",
+        "recon_save_cookies",
+        "recon_load_cookies",
+        "recon_screenshot",
+        "recon_ensure_authenticated_session",
+        "recon_periodic_dom_snapshots",
+        "recon_close_session",
     ]
     for name in recon_tool_names:
         tools.append({
@@ -241,6 +255,38 @@ async def list_tools():
         })
 
     return {"tools": tools}
+
+
+@fastapi_app.post("/api/v1/recon/capture-current", response_model=ReconTriggerResponse)
+async def api_recon_capture_current():
+    """Run DOM capture on the **current** Playwright page (any suno.com path). Writes under ``recon_output/``."""
+    try:
+        msg = await recon_tools.capture_current_page_dom()
+        return ReconTriggerResponse(success=True, message=msg)
+    except SunoError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        logging.exception("recon capture-current")
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@fastapi_app.post("/api/v1/recon/find-elements", response_model=ReconTriggerResponse)
+async def api_recon_find_elements():
+    """Map interactive elements + suggested selectors on the **current** Playwright page."""
+    try:
+        msg = await recon_tools.find_interactive_elements()
+        return ReconTriggerResponse(success=True, message=msg)
+    except SunoError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        logging.exception("recon find-elements")
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@fastapi_app.get("/api/v1/recon/output-dir")
+async def api_recon_output_dir():
+    """Absolute path to the directory where recon HTML/JSON is written (cwd-relative)."""
+    return {"path": str(recon_tools.recon_dir.resolve())}
 
 
 @fastapi_app.post("/api/v1/tools/{tool_name}")
@@ -287,11 +333,14 @@ async def _handle_recon_tool(tool_name: str, args: dict[str, Any]) -> str:
     tool_map = {
         "recon_start_session": recon_tools.start_recon_session,
         "recon_capture_dom": recon_tools.capture_studio_dom,
+        "recon_capture_page": recon_tools.capture_current_page_dom,
         "recon_find_elements": recon_tools.find_interactive_elements,
         "recon_save_cookies": recon_tools.save_cookies,
         "recon_load_cookies": recon_tools.load_cookies,
         "recon_screenshot": recon_tools.take_screenshot,
-        "recon_close": recon_tools.close_session,
+        "recon_close_session": recon_tools.close_session,
+        "recon_ensure_authenticated_session": recon_tools.ensure_authenticated_session,
+        "recon_periodic_dom_snapshots": recon_tools.periodic_dom_snapshots,
     }
 
     if tool_name not in tool_map:
@@ -468,6 +517,27 @@ async def recon_capture_dom(
         Summary of captured elements with file paths
     """
     return await recon_tools.capture_studio_dom(save_html, save_json)
+
+
+@mcp_app.tool()
+async def recon_capture_page(
+    save_html: bool = True,
+    save_json: bool = True,
+) -> str:
+    """
+    Capture DOM for the **current** Playwright page (any Suno URL).
+
+    Use this when you are on create, library, studio, etc. Same files power selector updates;
+    also exposed as **POST /api/v1/recon/capture-current** from the webapp.
+
+    Args:
+        save_html: Save raw HTML snapshot
+        save_json: Save structured analysis JSON
+
+    Returns:
+        Paths under ``recon_output/`` and an element summary
+    """
+    return await recon_tools.capture_current_page_dom(save_html, save_json)
 
 
 @mcp_app.tool()
@@ -747,7 +817,7 @@ async def get_server_status() -> str:
 **Server Configuration:**
 • Version: 1.2.0
 • Mode: Dual Interface (MCP stdio + FastAPI HTTP)
-• Total Tools Available: 19 (incl. agentic_suno_workflow)
+• Total Tools Available: 20 (incl. agentic_suno_workflow, recon_capture_page)
 • Basic Tools: 6
 • Recon Tools: 9
 • System Tools: 2

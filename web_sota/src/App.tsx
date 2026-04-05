@@ -7,6 +7,7 @@ import { Tools } from '@/pages/tools';
 import { Status } from '@/pages/status';
 import { Apps } from '@/pages/apps';
 import { Help } from '@/pages/help';
+import { Recon } from '@/pages/recon';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/status" element={<Status />} />
+          <Route path="/recon" element={<Recon />} />
           <Route path="/apps" element={<Apps />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/help" element={<Help />} />

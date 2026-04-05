@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HelpCircle, Book, Code, Info } from "lucide-react";
+import { Book, Code, Info } from "lucide-react";
 
 export function Help() {
     return (

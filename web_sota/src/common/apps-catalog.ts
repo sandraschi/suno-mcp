@@ -1,14 +1,4 @@
-import {
-    Github,
-    Bot,
-    Brain,
-    LayoutGrid,
-    Scan,
-    MonitorPlay,
-    Box,
-    Activity,
-    Archive
-} from 'lucide-react';
+import { Bot, Brain, LayoutGrid, Scan, MonitorPlay, Activity, Archive } from "lucide-react";
 
 export interface AppEntry {
     id: string;
