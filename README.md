@@ -1,5 +1,7 @@
 # Suno-MCP
 
+[![FastMCP Version](https://img.shields.io/badge/FastMCP-3.1.0-blue?style=flat-square&logo=python&logoColor=white)](https://github.com/sandraschi/fastmcp) [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff) [![Linted with Biome](https://img.shields.io/badge/Linted_with-Biome-60a5fa?style=flat-square&logo=biome&logoColor=white)](https://biomejs.dev/) [![Built with Just](https://img.shields.io/badge/Built_with-Just-000000?style=flat-square&logo=gnu-bash&logoColor=white)](https://github.com/casey/just)
+
 MCP server that drives **suno.com in a browser** via Playwright. There is **no official Suno API** in this projectonly brittle UI automation against a site that changes whenever Suno ships an update.
 
 ## Is this useless?
@@ -68,7 +70,7 @@ Rough count: **6** `suno_*`, **10** `recon_*` (includes **`recon_capture_page`**
 
 If a feature is not in this list, **it does not exist** in this repo.
 
-## FastMCP 3.x extras
+## FastMCP 3.1.0x extras
 
 - **Sampling / agentic:** Configure `SUNO_SAMPLING_BASE_URL` (default `http://127.0.0.1:11434/v1`), `SUNO_SAMPLING_MODEL`, optional `SUNO_SAMPLING_API_KEY`; `SUNO_SAMPLING_USE_CLIENT_LLM=1` to prefer the host LLM; `SUNO_SAMPLING_USE_OPENAI_KEY=1` uses `OPENAI_API_KEY` for cloud endpoints.
 - **Skills:** Bundled `skill://music-generation/SKILL.md` (if present in package).
@@ -119,6 +121,17 @@ Older ad-hoc markdown may be aspirational. **Trust `README.md` + `src/suno_mcp/`
 1. **Nothing clicks / fills**  Suno changed the UI. Use **`recon_capture_page`** (any page) or `recon_capture_dom` (Studio), **`recon_find_elements`**, or the **`/recon`** web page; compare output to `tools/basic/tools.py`, update selectors, or use manual control only.
 2. **Login tool disabled**  By design; use cookies or set `SUNO_ENABLE_PROGRAMMATIC_LOGIN=1` (still may fail with 2FA or UI changes).
 3. **Playwright errors**  Run with `headless=false`, watch the window, confirm you can complete the flow by hand first.
+
+
+## 🛡️ Industrial Quality Stack
+
+This project adheres to **SOTA 14.1** industrial standards for high-fidelity agentic orchestration:
+
+- **Python (Core)**: [Ruff](https://astral.sh/ruff) for linting and formatting. Zero-tolerance for `print` statements in core handlers (`T201`).
+- **Webapp (UI)**: [Biome](https://biomejs.dev/) for sub-millisecond linting. Strict `noConsoleLog` enforcement.
+- **Protocol Compliance**: Hardened `stdout/stderr` isolation to ensure crash-resistant JSON-RPC communication.
+- **Automation**: [Justfile](./justfile) recipes for all fleet operations (`just lint`, `just fix`, `just dev`).
+- **Security**: Automated audits via `bandit` and `safety`.
 
 ## License
 
