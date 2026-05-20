@@ -7,6 +7,9 @@
   <a href="https://github.com/PrefectHQ/fastmcp"><img src="https://img.shields.io/badge/FastMCP-3.2-7c5cfc?style=flat-square" alt="FastMCP"></a>
 </p>
 
+
+> 📖 **[Installation Guide](INSTALL.md)** — quick start, manual setup, and troubleshooting
+
 MCP server that drives **suno.com in a browser** via Playwright. There is **no official Suno API** in this projectonly brittle UI automation against a site that changes whenever Suno ships an update.
 
 ## Is this useless?
