@@ -174,3 +174,5 @@ downloads/
 *.wav
 *.flac
 *.aac
+
+_dashboard/
