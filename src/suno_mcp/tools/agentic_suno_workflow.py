@@ -88,9 +88,7 @@ def register_agentic_suno_workflow(app) -> None:
 
             all_tools = await app.list_tools()
             name_to_tool = {t.name: t for t in all_tools if hasattr(t, "name")}
-            tools_for_sampling = [
-                name_to_tool[name] for name in available_tools if name in name_to_tool
-            ]
+            tools_for_sampling = [name_to_tool[name] for name in available_tools if name in name_to_tool]
             missing = [n for n in available_tools if n not in name_to_tool]
             if missing:
                 logger.warning("Agentic workflow: tools not found on app: %s", missing)

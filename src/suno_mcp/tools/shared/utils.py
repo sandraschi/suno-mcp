@@ -1,22 +1,19 @@
 """Shared utilities for browser automation and tool helpers."""
 
-import asyncio
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from playwright.async_api import Browser, BrowserContext, Page, Playwright, async_playwright
 
-from .exceptions import BrowserError, SunoError
+from .exceptions import BrowserError
 
 
 class SelectorHelper:
     """Helper class for robust element selection."""
 
     @staticmethod
-    async def try_selectors(
-        page: Page, selectors: list[str], action: str = "click", **kwargs
-    ) -> bool:
+    async def try_selectors(page: Page, selectors: list[str], action: str = "click", **kwargs) -> bool:
         """Try multiple selectors for an action."""
         for selector in selectors:
             try:
@@ -33,7 +30,7 @@ class SelectorHelper:
         return False
 
     @staticmethod
-    async def wait_for_any_selector(page: Page, selectors: list[str], **kwargs) -> Optional[str]:
+    async def wait_for_any_selector(page: Page, selectors: list[str], **kwargs) -> str | None:
         """Wait for any of the selectors to appear."""
         for selector in selectors:
             try:
@@ -48,13 +45,13 @@ class BrowserManager:
     """Manages browser lifecycle and sessions."""
 
     def __init__(self) -> None:
-        self.playwright: Optional[Playwright] = None
-        self.browser: Optional[Browser] = None
-        self.context: Optional[BrowserContext] = None
-        self.page: Optional[Page] = None
+        self.playwright: Playwright | None = None
+        self.browser: Browser | None = None
+        self.context: BrowserContext | None = None
+        self.page: Page | None = None
         self.logger = logging.getLogger(__name__)
 
-    async def ensure_browser(self, headless: bool = True) -> Dict[str, Any]:
+    async def ensure_browser(self, headless: bool = True) -> dict[str, Any]:
         """Ensure browser is initialized and return browser components."""
         try:
             if not self.playwright:
@@ -102,7 +99,7 @@ class BrowserManager:
             }
         except Exception as e:
             self.logger.error(f"Failed to initialize browser: {e}")
-            raise BrowserError(f"Browser initialization failed: {str(e)}", "BROWSER_INIT_ERROR")
+            raise BrowserError(f"Browser initialization failed: {e!s}", "BROWSER_INIT_ERROR")
 
     async def _handle_download(self, download) -> None:
         """Handle file downloads."""
@@ -139,9 +136,9 @@ class BrowserManager:
 
         except Exception as e:
             self.logger.error(f"Error closing browser: {e}")
-            raise BrowserError(f"Browser cleanup failed: {str(e)}", "BROWSER_CLOSE_ERROR")
+            raise BrowserError(f"Browser cleanup failed: {e!s}", "BROWSER_CLOSE_ERROR")
 
-    async def get_status(self) -> Dict[str, Any]:
+    async def get_status(self) -> dict[str, Any]:
         """Get current browser status."""
         try:
             status = {
@@ -176,7 +173,7 @@ class BrowserManager:
             }
 
 
-_shared_browser_manager: Optional[BrowserManager] = None
+_shared_browser_manager: BrowserManager | None = None
 
 
 def get_shared_browser_manager() -> BrowserManager:
@@ -225,7 +222,7 @@ class ConfigManager:
 
     def get(self, key: str, default: Any = None) -> Any:
         """Get configuration value by dot notation key."""
-        keys = key.split('.')
+        keys = key.split(".")
         value = self.config
 
         for k in keys:
@@ -238,7 +235,7 @@ class ConfigManager:
 
     def set(self, key: str, value: Any) -> None:
         """Set configuration value by dot notation key."""
-        keys = key.split('.')
+        keys = key.split(".")
         config = self.config
 
         for k in keys[:-1]:

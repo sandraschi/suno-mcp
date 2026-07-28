@@ -3,4 +3,4 @@
 from .exceptions import SunoError
 from .utils import BrowserManager, SelectorHelper
 
-__all__ = ["SunoError", "BrowserManager", "SelectorHelper"]
+__all__ = ["BrowserManager", "SelectorHelper", "SunoError"]

@@ -108,9 +108,7 @@ def _mcp_tools_to_openai(tools: list[Tool] | None) -> list[dict[str, Any]] | Non
                 "function": {
                     "name": t.name,
                     "description": t.description or f"MCP tool {t.name}",
-                    "parameters": (
-                        t.inputSchema if isinstance(t.inputSchema, dict) else {"type": "object"}
-                    ),
+                    "parameters": (t.inputSchema if isinstance(t.inputSchema, dict) else {"type": "object"}),
                 },
             }
         )
@@ -150,11 +148,7 @@ def _sampling_messages_to_openai(
         if msg.role == "user":
             tool_results = [b for b in blocks if isinstance(b, ToolResultContent)]
             texts = [b for b in blocks if isinstance(b, TextContent)]
-            non_text = [
-                b
-                for b in blocks
-                if not isinstance(b, (TextContent, ToolResultContent))
-            ]
+            non_text = [b for b in blocks if not isinstance(b, (TextContent, ToolResultContent))]
             for tr in tool_results:
                 out.append(
                     {
@@ -177,11 +171,7 @@ def _sampling_messages_to_openai(
         elif msg.role == "assistant":
             tool_uses = [b for b in blocks if isinstance(b, ToolUseContent)]
             texts = [b for b in blocks if isinstance(b, TextContent)]
-            non_text = [
-                b
-                for b in blocks
-                if not isinstance(b, (TextContent, ToolUseContent))
-            ]
+            non_text = [b for b in blocks if not isinstance(b, (TextContent, ToolUseContent))]
             if tool_uses:
                 tool_calls = []
                 for tu in tool_uses:
@@ -358,9 +348,7 @@ class SunoSamplingHandler:
                 except json.JSONDecodeError:
                     parsed = {"_raw": raw_args}
                 tid = tc.get("id") or str(uuid.uuid4())
-                blocks.append(
-                    ToolUseContent(type="tool_use", name=name, id=tid, input=parsed)
-                )
+                blocks.append(ToolUseContent(type="tool_use", name=name, id=tid, input=parsed))
             return CreateMessageResultWithTools(
                 role="assistant",
                 model=str(data.get("model") or model),

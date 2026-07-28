@@ -11,24 +11,29 @@ class SunoError(Exception):
 
 class BrowserError(SunoError):
     """Browser-related errors."""
+
     pass
 
 
 class AuthenticationError(SunoError):
     """Authentication-related errors."""
+
     pass
 
 
 class GenerationError(SunoError):
     """Music generation-related errors."""
+
     pass
 
 
 class DownloadError(SunoError):
     """Download-related errors."""
+
     pass
 
 
 class StudioError(SunoError):
     """Studio/DAW-related errors."""
+
     pass

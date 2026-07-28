@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Suno MCP Server — FastMCP 3.1 (MCP + FastAPI): sampling, prompts, skills, agentic workflow."""
 
-import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -31,12 +30,14 @@ _USE_CLIENT_SAMPLING = os.getenv("SUNO_SAMPLING_USE_CLIENT_LLM", "").lower() in 
 # FastAPI Models
 class ToolRequest(BaseModel):
     """Request model for tool execution via FastAPI."""
+
     name: str
     arguments: dict[str, Any] | None = None
 
 
 class HealthResponse(BaseModel):
     """Health check response model."""
+
     status: str = "ok"
     version: str = "1.2.0"
     uptime: float
@@ -45,6 +46,7 @@ class HealthResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     """Status response model."""
+
     browser_open: bool
     page_ready: bool
     current_url: str | None
@@ -55,6 +57,7 @@ class StatusResponse(BaseModel):
 
 class ReconTriggerResponse(BaseModel):
     """Webapp / API trigger for recon on the shared Playwright page."""
+
     success: bool
     message: str
 
@@ -96,6 +99,7 @@ SAMPLING: Default server-side OpenAI-compatible LLM at SUNO_SAMPLING_BASE_URL (O
 _skills_root = Path(__file__).resolve().parent / "skills"
 if _skills_root.is_dir():
     mcp_app.add_provider(SkillsDirectoryProvider(roots=[_skills_root]))
+
 
 # Lifespan context manager for FastAPI
 @asynccontextmanager
@@ -186,6 +190,7 @@ def prompt_agentic_instructions() -> str:
 async def health_check():
     """Health check endpoint returning JSON status."""
     import time
+
     start_time = getattr(fastapi_app, "start_time", time.time())
     current_time = time.time()
 
@@ -210,7 +215,7 @@ async def get_status():
             current_url=current_url,
             page_title=browser_status.get("page_title"),
             in_studio="/studio" in (current_url or ""),
-            server_mode="dual"
+            server_mode="dual",
         )
     except Exception as e:
         logging.error(f"Status check failed: {e}")
@@ -224,15 +229,15 @@ async def list_tools():
 
     # Basic tools
     basic_tool_names = [
-        "suno_open_browser", "suno_login", "suno_generate_track",
-        "suno_download_track", "suno_get_status", "suno_close_browser"
+        "suno_open_browser",
+        "suno_login",
+        "suno_generate_track",
+        "suno_download_track",
+        "suno_get_status",
+        "suno_close_browser",
     ]
     for name in basic_tool_names:
-        tools.append({
-            "name": name,
-            "description": f"{name} tool",
-            "category": "basic"
-        })
+        tools.append({"name": name, "description": f"{name} tool", "category": "basic"})
 
     # Recon tools
     recon_tool_names = [
@@ -248,11 +253,7 @@ async def list_tools():
         "recon_close_session",
     ]
     for name in recon_tool_names:
-        tools.append({
-            "name": name,
-            "description": f"{name} tool",
-            "category": "recon"
-        })
+        tools.append({"name": name, "description": f"{name} tool", "category": "recon"})
 
     return {"tools": tools}
 
@@ -352,6 +353,7 @@ async def _handle_recon_tool(tool_name: str, args: dict[str, Any]) -> str:
 # =============================================================================
 # MCP Tool Registration - Basic Tools
 # =============================================================================
+
 
 @mcp_app.tool()
 async def suno_open_browser(headless: bool = True) -> str:
@@ -469,6 +471,7 @@ async def suno_close_browser() -> str:
 # =============================================================================
 # MCP Tool Registration - Reconnaissance Tools (NEW)
 # =============================================================================
+
 
 @mcp_app.tool()
 async def recon_start_session(headless: bool = False) -> str:
@@ -667,6 +670,7 @@ async def recon_close_session() -> str:
 # System Tools
 # =============================================================================
 
+
 @mcp_app.tool()
 async def help(level: str = "basic") -> str:
     """
@@ -824,12 +828,12 @@ async def get_server_status() -> str:
 • Agentic: 1
 
 **Browser Session:**
-• Browser Open: {browser_status.get('browser_open', False)}
-• Context Ready: {browser_status.get('context_ready', False)}
-• Page Ready: {browser_status.get('page_ready', False)}
-• Current URL: {browser_status.get('current_url', 'None')}
-• Page Title: {browser_status.get('page_title', 'None')}
-• In Studio Mode: {browser_status.get('in_studio', False)}
+• Browser Open: {browser_status.get("browser_open", False)}
+• Context Ready: {browser_status.get("context_ready", False)}
+• Page Ready: {browser_status.get("page_ready", False)}
+• Current URL: {browser_status.get("current_url", "None")}
+• Page Title: {browser_status.get("page_title", "None")}
+• In Studio Mode: {browser_status.get("in_studio", False)}
 
 **System Health:**
 • Status: ✅ Operational
@@ -843,7 +847,7 @@ async def get_server_status() -> str:
     except Exception as e:
         return f"""❌ **Status Check Failed**
 
-Error: {str(e)}
+Error: {e!s}
 
 **Troubleshooting:**
 • Ensure Playwright browsers are installed: `playwright install chromium`
@@ -877,8 +881,5 @@ def main_api():
 
 if __name__ == "__main__":
     # Configure logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     main()

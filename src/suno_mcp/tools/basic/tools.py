@@ -4,9 +4,7 @@ import asyncio
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
-
-from playwright.async_api import Browser, BrowserContext, Page, Playwright, async_playwright
+from typing import Any
 
 from ..shared.exceptions import BrowserError, SunoError
 from ..shared.utils import SelectorHelper, get_shared_browser_manager
@@ -18,9 +16,7 @@ class BasicSunoTools:
     def __init__(self) -> None:
         self.browser_manager = get_shared_browser_manager()
         self.logger = logging.getLogger(__name__)
-        self.allow_programmatic_login = os.getenv(
-            "SUNO_ENABLE_PROGRAMMATIC_LOGIN", ""
-        ).lower() in ("1", "true", "yes")
+        self.allow_programmatic_login = os.getenv("SUNO_ENABLE_PROGRAMMATIC_LOGIN", "").lower() in ("1", "true", "yes")
         self.create_url = "https://suno.com/create"
         self.library_url = "https://suno.com/library"
 
@@ -40,7 +36,7 @@ class BasicSunoTools:
 
         except Exception as e:
             self.logger.error(f"Browser open failed: {e}")
-            raise BrowserError(f"Browser initialization failed: {str(e)}", "BROWSER_INIT_ERROR")
+            raise BrowserError(f"Browser initialization failed: {e!s}", "BROWSER_INIT_ERROR")
 
     async def login(self, email: str, password: str) -> str:
         """Login to Suno AI account."""
@@ -66,7 +62,7 @@ class BasicSunoTools:
                 'button:has-text("Login")',
                 'a:has-text("Login")',
                 '[data-testid="login-button"]',
-                '.login-button',
+                ".login-button",
             ]
 
             await SelectorHelper.try_selectors(page, login_selectors, "click")
@@ -80,7 +76,7 @@ class BasicSunoTools:
                 'input[name="email"]',
                 'input[placeholder*="email" i]',
                 'input[placeholder*="Email" i]',
-                '#email',
+                "#email",
                 '[data-testid="email-input"]',
             ]
 
@@ -92,7 +88,7 @@ class BasicSunoTools:
                 'input[name="password"]',
                 'input[placeholder*="password" i]',
                 'input[placeholder*="Password" i]',
-                '#password',
+                "#password",
                 '[data-testid="password-input"]',
             ]
 
@@ -105,7 +101,7 @@ class BasicSunoTools:
                 'button:has-text("Login")',
                 'button:has-text("Continue")',
                 '[data-testid="submit-button"]',
-                '.submit-button',
+                ".submit-button",
             ]
 
             await SelectorHelper.try_selectors(page, submit_selectors, "click")
@@ -123,13 +119,13 @@ class BasicSunoTools:
 
         except Exception as e:
             self.logger.error(f"Login failed: {e}")
-            raise SunoError(f"Login failed: {str(e)}", "LOGIN_ERROR")
+            raise SunoError(f"Login failed: {e!s}", "LOGIN_ERROR")
 
     async def generate_track(
         self,
         prompt: str,
         style: str = "synthwave",
-        lyrics: Optional[str] = None,
+        lyrics: str | None = None,
         duration: str = "auto",
     ) -> str:
         """Generate a new music track using Suno AI."""
@@ -151,8 +147,8 @@ class BasicSunoTools:
                 'textarea[placeholder*="prompt" i]',
                 'textarea[name="prompt"]',
                 'textarea[data-testid="prompt-input"]',
-                '.prompt-input',
-                '#prompt',
+                ".prompt-input",
+                "#prompt",
             ]
 
             for selector in prompt_selectors:
@@ -170,7 +166,7 @@ class BasicSunoTools:
                     'textarea[placeholder*="Lyrics" i]',
                     'textarea[name="lyrics"]',
                     'textarea[data-testid="lyrics-input"]',
-                    '.lyrics-input',
+                    ".lyrics-input",
                 ]
                 await SelectorHelper.try_selectors(page, lyrics_selectors, "fill", value=lyrics)
 
@@ -200,7 +196,7 @@ class BasicSunoTools:
                 'button:has-text("Make Song")',
                 'button[type="submit"]',
                 '[data-testid="generate-button"]',
-                '.generate-button',
+                ".generate-button",
             ]
 
             generate_clicked = await SelectorHelper.try_selectors(page, generate_selectors, "click")
@@ -215,20 +211,19 @@ class BasicSunoTools:
             generation_started = False
             try:
                 await page.wait_for_selector(
-                    '[data-testid="generating"], .generating, [data-status="generating"]',
-                    timeout=5000
+                    '[data-testid="generating"], .generating, [data-status="generating"]', timeout=5000
                 )
                 generation_started = True
             except Exception:
                 pass  # Generation may have started without visible indicator
 
-            return f"🎵 Track generation {'started' if generation_started else 'initiated'}!\nPrompt: \"{prompt}\"\nStyle: {style}\n{f'Lyrics: {lyrics[:50]}...' if lyrics else ''}\n\nGeneration in progress... Use suno_get_status to check progress."
+            return f'🎵 Track generation {"started" if generation_started else "initiated"}!\nPrompt: "{prompt}"\nStyle: {style}\n{f"Lyrics: {lyrics[:50]}..." if lyrics else ""}\n\nGeneration in progress... Use suno_get_status to check progress.'
 
         except Exception as e:
             if isinstance(e, SunoError):
                 raise
             self.logger.error(f"Track generation failed: {e}")
-            raise SunoError(f"Track generation failed: {str(e)}", "GENERATE_ERROR")
+            raise SunoError(f"Track generation failed: {e!s}", "GENERATE_ERROR")
 
     async def download_track(
         self,
@@ -286,7 +281,7 @@ class BasicSunoTools:
                         continue
 
             if not track_found:
-                raise SunoError(f"Track with ID \"{track_id}\" not found in library", "TRACK_NOT_FOUND")
+                raise SunoError(f'Track with ID "{track_id}" not found in library', "TRACK_NOT_FOUND")
 
             # Wait for track page to load
             await asyncio.sleep(2)
@@ -302,7 +297,7 @@ class BasicSunoTools:
                 'button:has-text("Export")',
                 'a:has-text("Download")',
                 '[data-testid="download-button"]',
-                '.download-button',
+                ".download-button",
             ]
 
             download_clicked = await SelectorHelper.try_selectors(page, download_selectors, "click")
@@ -325,7 +320,7 @@ class BasicSunoTools:
                         'button:has-text("Download Stems")',
                         'button:has-text("Export Stems")',
                         '[data-testid="stems-button"]',
-                        '.stems-button',
+                        ".stems-button",
                     ]
 
                     stems_download_event = page.wait_for_event("download")
@@ -350,7 +345,7 @@ class BasicSunoTools:
             if isinstance(e, SunoError):
                 raise
             self.logger.error(f"Download failed: {e}")
-            raise SunoError(f"Download failed: {str(e)}", "DOWNLOAD_ERROR")
+            raise SunoError(f"Download failed: {e!s}", "DOWNLOAD_ERROR")
 
     async def get_status(self) -> str:
         """Get current Suno AI session status."""
@@ -361,7 +356,7 @@ class BasicSunoTools:
 
         except Exception as e:
             self.logger.error(f"Status check failed: {e}")
-            raise SunoError(f"Status check failed: {str(e)}", "STATUS_ERROR")
+            raise SunoError(f"Status check failed: {e!s}", "STATUS_ERROR")
 
     async def close_browser(self) -> str:
         """Close the browser session."""
@@ -371,8 +366,8 @@ class BasicSunoTools:
 
         except Exception as e:
             self.logger.error(f"Browser close failed: {e}")
-            raise SunoError(f"Browser close failed: {str(e)}", "CLOSE_ERROR")
+            raise SunoError(f"Browser close failed: {e!s}", "CLOSE_ERROR")
 
-    async def get_browser_status(self) -> Dict[str, Any]:
+    async def get_browser_status(self) -> dict[str, Any]:
         """Get detailed browser status for internal use."""
         return await self.browser_manager.get_status()

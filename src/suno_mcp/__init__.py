@@ -1,7 +1,7 @@
 """Suno MCP Server - Automated Suno AI Music Generation.
 
 This package provides an MCP (Model Context Protocol) server that automates
-Suno AI music generation and includes reconnaissance tools for Studio 
+Suno AI music generation and includes reconnaissance tools for Studio
 DOM analysis to enable automation development.
 
 Features:
