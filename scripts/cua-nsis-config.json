@@ -1,0 +1,14 @@
+{
+    "product_name": "Suno MCP",
+    "install_dir": "%LOCALAPPDATA%\\Suno MCP",
+    "operator_exe": "suno-mcp-native.exe",
+    "backend_process_names": ["suno-mcp-native", "suno-mcp-backend"],
+    "backend_port": 10700,
+    "health_path": "/api/v1/health",
+    "diagnostics_path": "/api/v1/diagnostics",
+    "feature_smoke_path": "/api/v1/system/info",
+    "window_title_re": "Suno MCP",
+    "nsis_glob": "native/target/release/bundle/nsis/Suno MCP_*_x64-setup.exe",
+    "bridge_ok_text": "REST bridge reachable",
+    "uninstall_registry_filter": "*Suno MCP*"
+}

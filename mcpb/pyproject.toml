@@ -10,10 +10,10 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.12"
 authors = [
-{name = "Sandra Schipal", email = "sandraschipal@gmail.com"},
+    {name = "Sandra Schipal", email = "sandra@example.com"},
 ]
 maintainers = [
-    {name = "Sandra Schipal", email = "sandraschipal@gmail.com"},
+    {name = "Sandra Schipal", email = "sandra@example.com"},
 ]
 keywords = ["mcp", "suno", "ai", "music", "automation", "playwright"]
 classifiers = [
@@ -36,20 +36,20 @@ dependencies = [
     "playwright>=1.40.0",
     "pydantic>=2.0.0",
     "uvloop>=0.17.0 ; sys_platform != 'win32'",
-    "fastmcp>=3.4.4,<4",
+    "fastmcp>=3.2,<4",
+    "ruff>=0.15.2",
     "prefab-ui>=0.14.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pre-commit>=4.6.1",
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.0.0",
     "black>=23.0.0",
     "isort>=5.12.0",
     "mypy>=1.0.0",
-    "ruff>=0.16.0,<0.17",
+    "ruff>=0.1.0",
 ]
 docs = [
     "sphinx>=5.0.0",
@@ -57,10 +57,10 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/sandraschi/suno-mcp"
-Documentation = "https://github.com/sandraschi/suno-mcp#readme"
-Repository = "https://github.com/sandraschi/suno-mcp"
-Issues = "https://github.com/sandraschi/suno-mcp/issues"
+Homepage = "https://github.com/sandra/suno-mcp"
+Documentation = "https://suno-mcp.readthedocs.io/"
+Repository = "https://github.com/sandra/suno-mcp.git"
+Issues = "https://github.com/sandra/suno-mcp/issues"
 Changelog = "https://github.com/sandra/suno-mcp/blob/main/CHANGELOG.md"
 
 [project.scripts]
@@ -76,7 +76,50 @@ where = ["src"]
 [tool.setuptools.package-data]
 suno_mcp = ["py.typed", "skills/**/*.md"]
 
-# Mypy and isort checked via ruff
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["suno_mcp"]
+known_third_party = ["mcp", "playwright", "pydantic"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["playwright.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -104,12 +147,8 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "S", "UP", "RUF"]
-ignore = ["S101", "B008", "S106", "S110", "S112", "S101", "B008", "S106", "S110", "S112", "RUF012", "S603", "S607", "S324", "E402", "E501", "B904", "S104"]
+ignore = ["S101", "B008"]
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
-
-
-[tool.ruff.lint.per-file-ignores]
-"scripts/*" = ["B007", "S310", "S603", "S607"]

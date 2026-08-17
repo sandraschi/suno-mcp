@@ -1,0 +1,46 @@
+{
+  "manifest_version": "0.2",
+  "name": "suno-mcp",
+  "version": "1.2.0",
+  "description": "MCP server: Playwright automation against suno.com (fragile); DOM recon tools; no official Suno API",
+  "author": { "name": "sandraschi" },
+  "server": {
+    "type": "python",
+    "entry_point": "src/suno_mcp/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run","--directory","${PWD}","python","-m","suno_mcp"],
+      "env": {
+        "PYTHONPATH": "${PWD}/src",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  },
+  "tools": [
+    { "name": "suno_open_browser", "description": "suno_open_browser" },
+    { "name": "suno_login", "description": "suno_login" },
+    { "name": "suno_generate_track", "description": "suno_generate_track" },
+    { "name": "suno_download_track", "description": "suno_download_track" },
+    { "name": "suno_get_status", "description": "suno_get_status" },
+    { "name": "suno_close_browser", "description": "suno_close_browser" },
+    { "name": "recon_start_session", "description": "recon_start_session" },
+    { "name": "recon_capture_dom", "description": "recon_capture_dom" },
+    { "name": "recon_capture_page", "description": "recon_capture_page" },
+    { "name": "recon_find_elements", "description": "recon_find_elements" },
+    { "name": "recon_save_cookies", "description": "recon_save_cookies" },
+    { "name": "recon_load_cookies", "description": "recon_load_cookies" },
+    { "name": "recon_screenshot", "description": "recon_screenshot" },
+    { "name": "recon_ensure_authenticated_session", "description": "recon_ensure_authenticated_session" },
+    { "name": "recon_periodic_dom_snapshots", "description": "recon_periodic_dom_snapshots" },
+    { "name": "recon_close_session", "description": "recon_close_session" },
+    { "name": "help", "description": "help" },
+    { "name": "get_server_status", "description": "get_server_status" },
+    { "name": "list_tools", "description": "List all available tools via FastAPI." },
+    { "name": "api_recon_output_dir", "description": "Absolute path to the directory where recon HTML/JSON is written (cwd-relative)." },
+    { "name": "execute_tool", "description": "Execute a tool via FastAPI." },
+    { "name": "main_stdio", "description": "main(stdio)" },
+    { "name": "main_http", "description": "main(http)" },
+    { "name": "main_sse", "description": "main(sse)" },
+    { "name": "agentic_suno_workflow", "description": "agentic_suno_workflow" }
+  ]
+}
