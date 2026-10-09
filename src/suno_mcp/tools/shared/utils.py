@@ -8,6 +8,10 @@ from playwright.async_api import Browser, BrowserContext, Page, Playwright, asyn
 
 from .exceptions import BrowserError
 
+# Absolute, never CWD-relative: Claude Desktop spawns stdio servers with
+# cwd=C:\Windows\System32 (BUG-063). User-visible, so under ~/Downloads.
+DOWNLOADS_DIR = Path.home() / "Downloads" / "suno-mcp"
+
 
 class SelectorHelper:
     """Helper class for robust element selection."""
@@ -80,8 +84,8 @@ class BrowserManager:
                 )
 
                 # Set default download path
-                downloads_path = Path("downloads")
-                downloads_path.mkdir(exist_ok=True)
+                downloads_path = DOWNLOADS_DIR
+                downloads_path.mkdir(parents=True, exist_ok=True)
 
             if not self.page:
                 self.page = await self.context.new_page()
@@ -104,8 +108,8 @@ class BrowserManager:
     async def _handle_download(self, download) -> None:
         """Handle file downloads."""
         try:
-            downloads_path = Path("downloads")
-            downloads_path.mkdir(exist_ok=True)
+            downloads_path = DOWNLOADS_DIR
+            downloads_path.mkdir(parents=True, exist_ok=True)
 
             filename = download.suggested_filename
             filepath = downloads_path / filename

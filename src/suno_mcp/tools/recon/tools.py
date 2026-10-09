@@ -14,6 +14,7 @@ Since Suno has no public API, these tools help identify:
 import asyncio
 import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -30,8 +31,10 @@ class ReconTools:
     def __init__(self) -> None:
         self.browser_manager = get_shared_browser_manager()
         self.logger = logging.getLogger(__name__)
-        self.recon_dir = Path("recon_output")
-        self.recon_dir.mkdir(exist_ok=True)
+        # Absolute, never CWD-relative: Claude Desktop spawns stdio servers with
+        # cwd=C:\Windows\System32 and this runs at import (BUG-063).
+        self.recon_dir = Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "suno-mcp" / "recon_output"
+        self.recon_dir.mkdir(parents=True, exist_ok=True)
 
     async def start_recon_session(self, headless: bool = False) -> str:
         """
