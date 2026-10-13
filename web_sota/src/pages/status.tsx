@@ -128,41 +128,83 @@ export function Status() {
         </Card>
       </div>
 
-      <Card className="border-slate-800 bg-slate-950/50">
-        <CardHeader>
-          <CardTitle className="text-white">
-            Playwright / Suno page (same process as MCP tools)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid gap-2 font-mono text-sm text-slate-300 md:grid-cols-2">
-            <div className="flex justify-between border-b border-slate-800 py-1">
-              <span className="text-slate-500">browser_open</span>
-              <span>{browser ? String(browser.browser_open) : "—"}</span>
-            </div>
-            <div className="flex justify-between border-b border-slate-800 py-1">
-              <span className="text-slate-500">page_ready</span>
-              <span>{browser ? String(browser.page_ready) : "—"}</span>
-            </div>
-            <div className="flex justify-between border-b border-slate-800 py-1 md:col-span-2">
-              <span className="text-slate-500">current_url</span>
-              <span className="max-w-[70%] break-all text-right">
-                {browser?.current_url ?? "—"}
-              </span>
-            </div>
-            <div className="flex justify-between border-b border-slate-800 py-1 md:col-span-2">
-              <span className="text-slate-500">page_title</span>
-              <span className="max-w-[70%] break-all text-right">
-                {browser?.page_title ?? "—"}
-              </span>
-            </div>
-            <div className="flex justify-between border-b border-slate-800 py-1">
-              <span className="text-slate-500">in_studio</span>
-              <span>{browser ? String(browser.in_studio) : "—"}</span>
-            </div>
-          </dl>
-        </CardContent>
-      </Card>
+      {browser?.backend === "cli" || browser?.server_mode === "cli" ? (
+        <Card className="border-slate-800 bg-slate-950/50">
+          <CardHeader>
+            <CardTitle className="text-white">
+              Suno CLI (paperfoot/suno-cli)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="grid gap-2 font-mono text-sm text-slate-300 md:grid-cols-2">
+              <div className="flex justify-between border-b border-slate-800 py-1">
+                <span className="text-slate-500">cli_installed</span>
+                <span>
+                  {browser ? String(browser.cli_installed ?? false) : "—"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-slate-800 py-1">
+                <span className="text-slate-500">cli_version</span>
+                <span>{browser?.cli_version ?? "—"}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-800 py-1">
+                <span className="text-slate-500">cli_ready</span>
+                <span>{browser ? String(browser.cli_ready ?? false) : "—"}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-800 py-1 md:col-span-2">
+                <span className="text-slate-500">cli_error</span>
+                <span className="max-w-[70%] break-all text-right text-amber-200">
+                  {browser?.cli_error ?? "—"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-slate-800 py-1 md:col-span-2">
+                <span className="text-slate-500">cli_credits</span>
+                <span className="max-w-[70%] break-all text-right">
+                  {browser?.cli_credits
+                    ? JSON.stringify(browser.cli_credits)
+                    : "—"}
+                </span>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-slate-800 bg-slate-950/50">
+          <CardHeader>
+            <CardTitle className="text-white">
+              Playwright / Suno page (legacy SUNO_BACKEND=playwright)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="grid gap-2 font-mono text-sm text-slate-300 md:grid-cols-2">
+              <div className="flex justify-between border-b border-slate-800 py-1">
+                <span className="text-slate-500">browser_open</span>
+                <span>{browser ? String(browser.browser_open) : "—"}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-800 py-1">
+                <span className="text-slate-500">page_ready</span>
+                <span>{browser ? String(browser.page_ready) : "—"}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-800 py-1 md:col-span-2">
+                <span className="text-slate-500">current_url</span>
+                <span className="max-w-[70%] break-all text-right">
+                  {browser?.current_url ?? "—"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-slate-800 py-1 md:col-span-2">
+                <span className="text-slate-500">page_title</span>
+                <span className="max-w-[70%] break-all text-right">
+                  {browser?.page_title ?? "—"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-slate-800 py-1">
+                <span className="text-slate-500">in_studio</span>
+                <span>{browser ? String(browser.in_studio) : "—"}</span>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

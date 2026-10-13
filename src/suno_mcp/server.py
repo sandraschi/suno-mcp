@@ -13,6 +13,7 @@ from fastmcp import FastMCP
 from fastmcp.server.providers.skills import SkillsDirectoryProvider
 from pydantic import BaseModel
 
+from .backends.config import load_config
 from .sampling.suno_sampling_handler import SunoSamplingHandler
 from .tools.agentic_suno_workflow import register_agentic_suno_workflow
 from .tools.basic.tools import BasicSunoTools
@@ -22,6 +23,7 @@ from .tools.shared.exceptions import SunoError
 from .transport import run_server
 
 SERVER_VERSION = "2.0.0-alpha.1"
+TOOLS_LOADED = 24
 
 _USE_CLIENT_SAMPLING = os.getenv("SUNO_SAMPLING_USE_CLIENT_LLM", "").lower() in (
     "1",
@@ -56,6 +58,12 @@ class StatusResponse(BaseModel):
     page_title: str | None
     in_studio: bool
     server_mode: str
+    backend: str = "cli"
+    cli_installed: bool | None = None
+    cli_version: str | None = None
+    cli_ready: bool | None = None
+    cli_credits: dict[str, Any] | None = None
+    cli_error: str | None = None
 
 
 class ReconTriggerResponse(BaseModel):
@@ -200,17 +208,34 @@ async def health_check():
 
     return HealthResponse(
         status="ok",
-        version="1.2.0",
+        version=SERVER_VERSION,
         uptime=current_time - start_time,
-        tools_loaded=20,
+        tools_loaded=TOOLS_LOADED,
     )
 
 
 @fastapi_app.get("/api/v1/status", response_model=StatusResponse)
 async def get_status():
-    """Get current server and browser status."""
+    """Get server status (CLI backend or legacy Playwright session)."""
+    config = load_config()
     try:
-        # Get browser status from basic tools
+        if config.backend == "cli":
+            snapshot = await cli_tools.backend.status_snapshot()
+            return StatusResponse(
+                browser_open=False,
+                page_ready=False,
+                current_url=None,
+                page_title=None,
+                in_studio=False,
+                server_mode="cli",
+                backend="cli",
+                cli_installed=snapshot.get("cli_installed"),
+                cli_version=snapshot.get("cli_version"),
+                cli_ready=snapshot.get("cli_ready"),
+                cli_credits=snapshot.get("cli_credits"),
+                cli_error=snapshot.get("cli_error"),
+            )
+
         browser_status = await basic_tools.get_browser_status()
         current_url = browser_status.get("current_url", "")
         return StatusResponse(
@@ -219,7 +244,8 @@ async def get_status():
             current_url=current_url,
             page_title=browser_status.get("page_title"),
             in_studio="/studio" in (current_url or ""),
-            server_mode="dual",
+            server_mode="playwright",
+            backend="playwright",
         )
     except Exception as e:
         logging.error(f"Status check failed: {e}")
@@ -497,7 +523,9 @@ async def suno_write_scaffold(genre: str, theme: str, vocal: str | None = None) 
 @mcp_app.tool()
 async def suno_open_browser(headless: bool = True) -> str:
     """
-    Open browser and navigate to Suno AI create page.
+    [Legacy] Open browser and navigate to Suno AI create page (SUNO_BACKEND=playwright).
+
+    Prefer v2: `suno_auth_status` + `suno_generate` via paperfoot suno-cli.
 
     This tool initializes a Playwright browser session and navigates to the Suno AI
     music generation interface. Required for all other Suno AI operations.

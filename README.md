@@ -8,15 +8,25 @@
 </p>
 
 
-> 📖 **[Installation Guide](INSTALL.md)** — quick start, manual setup, and troubleshooting
+> 📖 **[Installation Guide](INSTALL.md)** — quick start, manual setup, and troubleshooting  
+> 📋 **v2 plan:** [docs/SUNO_MCP_V2_PLAN.md](docs/SUNO_MCP_V2_PLAN.md) · [docs/UNOFFICIAL.md](docs/UNOFFICIAL.md)
 
-MCP server that drives **suno.com in a browser** via Playwright. There is **no official Suno API** in this projectonly brittle UI automation against a site that changes whenever Suno ships an update.
+MCP server for **Suno music generation** via the community **[paperfoot/suno-cli](https://github.com/paperfoot/suno-cli)** engine (`SUNO_BACKEND=cli`, default). Uses **your** Suno account and credits through the same private web API the site uses—not an official Suno product.
 
-## Is this useless?
+### v2 tools (preferred)
 
-**For hands-off, reliable Suno automation: basically yes  do not depend on it.** There is no stable API contract; Sunos UI changes; nothing here is a supported integration.
+| Tool | Purpose |
+|------|---------|
+| `suno_auth_status` | `suno doctor` + credits |
+| `suno_write_scaffold` | Free lyric scaffold (`suno write`) |
+| `suno_generate` | Generate + download (`suno generate --wait`) |
+| `suno_describe` | Prompt-only generation |
 
-**Not literally useless:** it is still a **wired-up MCP + Playwright + cookie/recon shell**. It can be worth using if you accept **human-in-the-loop** (you drive Suno in the browser; tools help with status, capture, cookies) or **you** own **selector fixes** when things break. Treat it as a **scratchpad or experiment**, not a turnkey product.
+**Bootstrap:** install `suno` CLI → `suno auth --login` → `suno doctor`. Set `SUNO_CLI_PATH` if needed.
+
+### Legacy Playwright
+
+`SUNO_BACKEND=playwright` enables brittle **browser UI** tools (`suno_generate_track`, `recon_*`). Keep for DOM forensics only; see sections below.
 
 ## What it can do today (be precise)
 
@@ -68,11 +78,12 @@ There is no magic upgrade path inside this repo that turns Sunos live SPA into a
 
 ## What ships in code (real tools)
 
-Rough count: **6** `suno_*`, **10** `recon_*` (includes **`recon_capture_page`** for any URL), plus `help`, `get_server_status`, and **`agentic_suno_workflow`** (needs FastMCP sampling + a reachable LLMsee env vars below).
+Rough count: **4** CLI `suno_*`, **6** legacy Playwright `suno_*`, **10** `recon_*`, plus `help`, `get_server_status`, and **`agentic_suno_workflow`**.
 
 | Area | Tools |
 |------|--------|
-| Browser / Suno UI | `suno_open_browser`, `suno_login`, `suno_generate_track`, `suno_download_track`, `suno_get_status`, `suno_close_browser` |
+| CLI (v2) | `suno_auth_status`, `suno_generate`, `suno_describe`, `suno_write_scaffold` |
+| Browser / Suno UI (legacy) | `suno_open_browser`, `suno_login`, `suno_generate_track`, `suno_download_track`, `suno_get_status`, `suno_close_browser` |
 | Recon / session | `recon_start_session`, `recon_capture_dom` (Studio-oriented), **`recon_capture_page`** (current URL), `recon_find_elements`, `recon_save_cookies`, `recon_load_cookies`, `recon_screenshot`, `recon_ensure_authenticated_session`, `recon_periodic_dom_snapshots`, `recon_close_session` |
 | Other | `help`, `get_server_status`, `agentic_suno_workflow` |
 

@@ -37,4 +37,8 @@ audit-deps:
     uv run safety check
 
 
+# Run suno CLI doctor + MCP import check (scripts/doctor.ps1)
+doctor:
+    powershell.exe -NoProfile -File scripts/doctor.ps1
+
 # Bootstrap: install dev deps + pre-commit hook

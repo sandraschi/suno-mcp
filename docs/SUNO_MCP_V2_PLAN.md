@@ -1,6 +1,6 @@
 # suno-mcp v2 plan
 
-**Status:** Phase 1 in progress (2026-09-14)
+**Status:** Phase 2 in progress (2026-10-13)
 
 ## North star
 
@@ -49,7 +49,8 @@ Optional: SUNO_BACKEND=playwright + SUNO_ENABLE_RECON=1 (legacy)
 - [x] `docs/UNOFFICIAL.md`
 - [x] memops plan note
 
-### Phase 1 - SunoCliBackend (current)
+### Phase 1 - SunoCliBackend
+
 
 - [x] `src/suno_mcp/backends/config.py`
 - [x] `src/suno_mcp/backends/cli_runner.py`
@@ -57,13 +58,16 @@ Optional: SUNO_BACKEND=playwright + SUNO_ENABLE_RECON=1 (legacy)
 - [x] MCP tools: `suno_auth_status`, `suno_generate`, `suno_describe`, `suno_write_scaffold`
 - [x] Unit tests with mocked subprocess
 - [x] FastAPI tool list + execute routes for CLI tools
-- [ ] FastAPI `/api/v1/status` CLI branch (Phase 2)
+- [x] FastAPI `/api/v1/status` CLI branch (credits probe)
 
-### Phase 2 - Surface cleanup
+### Phase 2 - Surface cleanup (current)
 
-- Default help points to CLI tools; legacy Playwright tools marked deprecated
-- `web_sota` status from `suno doctor`
-- Optional dependency group `legacy` for Playwright
+- [x] Default help points to CLI tools
+- [x] `web_sota` status panel for CLI (`cli_ready`, credits)
+- [x] README v2 section
+- [x] Optional dependency group `legacy` (playwright duplicated for future slim default)
+- [x] `scripts/doctor.ps1` (+ `just doctor`)
+- [x] Deprecation note on `suno_open_browser` (pattern for other legacy tools)
 
 ### Phase 3 - Optional second backend
 

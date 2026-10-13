@@ -198,6 +198,31 @@ class SunoCliBackend:
             args.extend(["--out", out_path])
         return await self.run(args, timeout_seconds=120.0)
 
+    async def status_snapshot(self) -> dict[str, Any]:
+        """Lightweight status for HTTP dashboard (credits probe, no full doctor)."""
+        installed = shutil.which(self.config.cli_path) is not None
+        version = await self.cli_version() if installed else None
+        ready = False
+        credits_data: dict[str, Any] | None = None
+        error_message = ""
+        if installed:
+            try:
+                result = await self.run(["credits"], timeout_seconds=25.0)
+                ready = True
+                if isinstance(result.data, dict):
+                    credits_data = result.data
+            except SunoError as exc:
+                error_message = str(exc)
+        return {
+            "cli_installed": installed,
+            "cli_version": version,
+            "cli_ready": ready,
+            "cli_credits": credits_data,
+            "cli_error": error_message or None,
+            "cli_path": self.config.cli_path,
+            "cli_min_version": self.config.cli_min_version,
+        }
+
     async def cli_version(self) -> str | None:
         cli = self._resolve_cli()
         proc = await asyncio.create_subprocess_exec(

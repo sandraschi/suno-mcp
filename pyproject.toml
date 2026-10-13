@@ -55,6 +55,9 @@ docs = [
     "sphinx>=5.0.0",
     "sphinx-rtd-theme>=1.2.0",
 ]
+legacy = [
+    "playwright>=1.40.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/sandraschi/suno-mcp"
