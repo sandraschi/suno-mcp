@@ -225,7 +225,7 @@ def _degraded_response_text(user_text: str, has_tools: bool) -> str:
     )
     _ = user_text
     return (
-        "[Suno-MCP sampling — HTTP LLM not used]\n\n"
+        "[Suno-MCP sampling - HTTP LLM not used]\n\n"
         f"{tool_note}\n\n"
         "Typical next step: suno_open_browser → suno_login → suno_generate_track, or "
         "agentic_suno_workflow once a local or cloud LLM endpoint is reachable."

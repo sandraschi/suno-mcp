@@ -1,5 +1,5 @@
 """
-FastMCP 3.1 sampling with tools — SEP-1577 agentic orchestration for Suno-MCP.
+FastMCP 3.1 sampling with tools - SEP-1577 agentic orchestration for Suno-MCP.
 """
 
 import logging
@@ -104,7 +104,7 @@ def register_agentic_suno_workflow(app) -> None:
             system_prompt = (
                 "You are a Suno AI music automation assistant. Use the provided MCP tools "
                 "to complete the browser/session/music task. Credentials may be required for "
-                "login — never echo passwords. Summarize results and next steps briefly."
+                "login - never echo passwords. Summarize results and next steps briefly."
             )
             messages: list = [{"role": "user", "content": workflow_prompt}]
             executed_tools: list[str] = []

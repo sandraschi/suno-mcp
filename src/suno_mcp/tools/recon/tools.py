@@ -230,7 +230,7 @@ Use `find_interactive_elements()` for detailed element mapping.
         """
         Capture DOM for whatever URL the shared Playwright page is on (create, studio, library, etc.).
 
-        Unlike ``capture_studio_dom``, does **not** require ``/studio`` in the URL—use this from the
+        Unlike ``capture_studio_dom``, does **not** require ``/studio`` in the URL-use this from the
         webapp "Analyze" flow or MCP when you are already navigated to the right screen.
         """
         try:

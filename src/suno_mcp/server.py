@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Suno MCP Server — FastMCP 3.1 (MCP + FastAPI): sampling, prompts, skills, agentic workflow."""
+"""Suno MCP Server - FastMCP 3.1 (MCP + FastAPI): sampling, prompts, skills, agentic workflow."""
 
 import logging
 import os
@@ -16,9 +16,12 @@ from pydantic import BaseModel
 from .sampling.suno_sampling_handler import SunoSamplingHandler
 from .tools.agentic_suno_workflow import register_agentic_suno_workflow
 from .tools.basic.tools import BasicSunoTools
+from .tools.cli.tools import CliSunoTools, ensure_cli_backend
 from .tools.recon.tools import ReconTools
 from .tools.shared.exceptions import SunoError
 from .transport import run_server
+
+SERVER_VERSION = "2.0.0-alpha.1"
 
 _USE_CLIENT_SAMPLING = os.getenv("SUNO_SAMPLING_USE_CLIENT_LLM", "").lower() in (
     "1",
@@ -39,7 +42,7 @@ class HealthResponse(BaseModel):
     """Health check response model."""
 
     status: str = "ok"
-    version: str = "1.2.0"
+    version: str = SERVER_VERSION
     uptime: float
     tools_loaded: int
 
@@ -64,6 +67,7 @@ class ReconTriggerResponse(BaseModel):
 
 # Global instances
 basic_tools = BasicSunoTools()
+cli_tools = CliSunoTools()
 recon_tools = ReconTools()
 
 sampling_handler = SunoSamplingHandler()
@@ -85,7 +89,7 @@ mcp_app = FastMCP(
 CORE: suno_open_browser, suno_login, suno_generate_track, suno_download_track, suno_get_status, suno_close_browser.
 RECON: recon_* for DOM capture, cookies, screenshots (Studio automation prep).
 SYSTEM: help, get_server_status.
-AGENTIC: agentic_suno_workflow — multi-step workflows via sampling with tools (SEP-1577); pass explicit tool names.
+AGENTIC: agentic_suno_workflow - multi-step workflows via sampling with tools (SEP-1577); pass explicit tool names.
 
 SAMPLING: Default server-side OpenAI-compatible LLM at SUNO_SAMPLING_BASE_URL (Ollama http://127.0.0.1:11434/v1). Set SUNO_SAMPLING_USE_CLIENT_LLM=1 to prefer the host LLM. Skills: skill://music-generation/SKILL.md.""",
     lifespan=_mcp_lifespan,
@@ -227,6 +231,16 @@ async def list_tools():
     """List all available tools via FastAPI."""
     tools = []
 
+    # CLI tools (v2)
+    cli_tool_names = [
+        "suno_auth_status",
+        "suno_generate",
+        "suno_describe",
+        "suno_write_scaffold",
+    ]
+    for name in cli_tool_names:
+        tools.append({"name": name, "description": f"{name} tool (paperfoot suno CLI)", "category": "cli"})
+
     # Basic tools
     basic_tool_names = [
         "suno_open_browser",
@@ -297,7 +311,9 @@ async def execute_tool(tool_name: str, request: ToolRequest):
         args = request.arguments or {}
 
         # Route to appropriate tool handler
-        if tool_name.startswith("suno_"):
+        if tool_name in _CLI_TOOL_NAMES:
+            result = await _handle_cli_tool(tool_name, args)
+        elif tool_name.startswith("suno_"):
             result = await _handle_basic_tool(tool_name, args)
         elif tool_name.startswith("recon_"):
             result = await _handle_recon_tool(tool_name, args)
@@ -312,6 +328,38 @@ async def execute_tool(tool_name: str, request: ToolRequest):
 
 
 # Tool execution helpers
+_CLI_TOOL_NAMES = frozenset(
+    {"suno_auth_status", "suno_generate", "suno_describe", "suno_write_scaffold"}
+)
+
+
+async def _handle_cli_tool(tool_name: str, args: dict[str, Any]) -> str:
+    ensure_cli_backend()
+    if tool_name == "suno_auth_status":
+        return await cli_tools.auth_status()
+    if tool_name == "suno_generate":
+        return await cli_tools.generate(
+            title=args["title"],
+            tags=args["tags"],
+            lyrics=args.get("lyrics"),
+            instrumental=bool(args.get("instrumental", False)),
+            model=args.get("model"),
+            download_dir=args.get("download_dir"),
+        )
+    if tool_name == "suno_describe":
+        return await cli_tools.describe(
+            prompt=args["prompt"],
+            title=args.get("title"),
+        )
+    if tool_name == "suno_write_scaffold":
+        return await cli_tools.write_scaffold(
+            genre=args["genre"],
+            theme=args["theme"],
+            vocal=args.get("vocal"),
+        )
+    raise HTTPException(status_code=404, detail=f"Unknown CLI tool: {tool_name}")
+
+
 async def _handle_basic_tool(tool_name: str, args: dict[str, Any]) -> str:
     """Handle basic Suno AI tools."""
     tool_map = {
@@ -351,7 +399,98 @@ async def _handle_recon_tool(tool_name: str, args: dict[str, Any]) -> str:
 
 
 # =============================================================================
-# MCP Tool Registration - Basic Tools
+# MCP Tool Registration - CLI backend (v2, paperfoot/suno-cli)
+# =============================================================================
+
+
+@mcp_app.tool()
+async def suno_auth_status() -> str:
+    """
+    Check Suno CLI auth, API reachability, and credits via `suno doctor` and `suno credits`.
+
+    Requires paperfoot/suno-cli on PATH (or SUNO_CLI_PATH). Run `suno auth --login` once locally
+    before expecting generation tools to work.
+
+    Returns:
+        JSON summary with doctor and credits payloads from the CLI.
+    """
+    ensure_cli_backend()
+    return await cli_tools.auth_status()
+
+
+@mcp_app.tool()
+async def suno_generate(
+    title: str,
+    tags: str,
+    lyrics: str | None = None,
+    instrumental: bool = False,
+    model: str | None = None,
+    download_dir: str | None = None,
+) -> str:
+    """
+    Generate music via paperfoot `suno generate` (v5.5 default model, waits for completion).
+
+    Uses your Suno account credits. Downloads MP3s to SUNO_DOWNLOAD_DIR or download_dir.
+
+    Args:
+        title: Song title
+        tags: Style prompt / tags (comma-separated)
+        lyrics: Optional lyrics with [Verse] / [Chorus] tags
+        instrumental: Generate without vocals
+        model: Optional model id (e.g. v5.5, v5); CLI default if omitted
+        download_dir: Override download directory
+
+    Returns:
+        JSON from suno CLI (clip ids, paths, status)
+    """
+    ensure_cli_backend()
+    return await cli_tools.generate(
+        title=title,
+        tags=tags,
+        lyrics=lyrics,
+        instrumental=instrumental,
+        model=model,
+        download_dir=download_dir,
+    )
+
+
+@mcp_app.tool()
+async def suno_describe(prompt: str, title: str | None = None) -> str:
+    """
+    Generate music from a free-text description via `suno describe --wait`.
+
+    Args:
+        prompt: What to create (up to ~500 chars)
+        title: Optional track title
+
+    Returns:
+        JSON from suno CLI when generation completes
+    """
+    ensure_cli_backend()
+    return await cli_tools.describe(prompt=prompt, title=title)
+
+
+@mcp_app.tool()
+async def suno_write_scaffold(genre: str, theme: str, vocal: str | None = None) -> str:
+    """
+    Create a lyric scaffold via `suno write` (no credits). Writes lyrics file under SUNO_DOWNLOAD_DIR.
+
+    Fill `<...>` placeholders in the output file, then call `suno_generate` with matching title/tags.
+
+    Args:
+        genre: Musical genre for the grammar engine
+        theme: Song theme
+        vocal: Optional `male` or `female`
+
+    Returns:
+        JSON envelope including next_action.argv for generate
+    """
+    ensure_cli_backend()
+    return await cli_tools.write_scaffold(genre=genre, theme=theme, vocal=vocal)
+
+
+# =============================================================================
+# MCP Tool Registration - Basic Tools (legacy Playwright)
 # =============================================================================
 
 
@@ -686,25 +825,20 @@ async def help(level: str = "basic") -> str:
         Formatted help text with usage instructions and examples
     """
     if level == "basic":
-        return """
-🎵 **Suno MCP Server Help** (v1.2.0)
+        return f"""
+🎵 **Suno MCP Server Help** ({SERVER_VERSION})
 
-**Available Tool Categories:**
-• **Basic Tools (6)**: Core Suno AI music generation
-• **Recon Tools (9)**: Studio DOM analysis, auth-session reuse, and drift snapshots
-• **Agentic (1)**: `agentic_suno_workflow` — multi-step flows via sampling (FastMCP 3.1)
+**Primary path (v2):** paperfoot `suno` CLI via SUNO_BACKEND=cli (default)
+• `suno_auth_status()` - doctor + credits
+• `suno_write_scaffold(genre, theme)` - free lyric scaffold
+• `suno_generate(title, tags, lyrics=...)` - generate + download
+• `suno_describe(prompt)` - prompt-only generation
 
-**Getting Started:**
-1. Use `suno_open_browser()` to start a session
-2. Use `recon_ensure_authenticated_session()` for manual-login reuse
-3. Use `suno_generate_track()` to create music
+**Bootstrap:** Install suno-cli, run `suno auth --login`, then `suno doctor`.
+See docs/SUNO_MCP_V2_PLAN.md and docs/UNOFFICIAL.md.
 
-**For Studio Automation Development:**
-1. Use `recon_start_session()` to open visible browser
-2. Manually login to Suno (Premier required for Studio)
-3. Navigate to Studio
-4. Use `recon_capture_dom()` to analyze interface
-5. Use `recon_save_cookies()` to preserve session
+**Legacy Playwright:** `suno_open_browser`, `suno_generate_track`, recon_* (SUNO_ENABLE_RECON)
+• Agentic: `agentic_suno_workflow` (sampling)
 
 **For detailed help:** Use `help("detailed")`
 """
@@ -732,7 +866,7 @@ async def help(level: str = "basic") -> str:
 - `recon_close_session()` - Close browser
 
 **Agentic (sampling):**
-- `agentic_suno_workflow(workflow_prompt, available_tools, max_iterations=5)` — SEP-1577; configure `SUNO_SAMPLING_*` or client sampling
+- `agentic_suno_workflow(workflow_prompt, available_tools, max_iterations=5)` - SEP-1577; configure `SUNO_SAMPLING_*` or client sampling
 
 **Output Locations:**
 - DOM captures: `recon_output/studio_dom_*.html`
@@ -816,16 +950,13 @@ async def get_server_status() -> str:
         browser_status = await basic_tools.get_browser_status()
 
         status = f"""
-🎵 **Suno MCP Server Status** (v1.2.0)
+🎵 **Suno MCP Server Status** ({SERVER_VERSION})
 
 **Server Configuration:**
-• Version: 1.2.0
+• Version: {SERVER_VERSION}
+• Backend: {os.getenv("SUNO_BACKEND", "cli")} (CLI engine: paperfoot/suno-cli)
 • Mode: Dual Interface (MCP stdio + FastAPI HTTP)
-• Total Tools Available: 20 (incl. agentic_suno_workflow, recon_capture_page)
-• Basic Tools: 6
-• Recon Tools: 9
-• System Tools: 2
-• Agentic: 1
+• CLI tools: 4 | Legacy Playwright: 6 | Recon: 9 | Agentic: 1
 
 **Browser Session:**
 • Browser Open: {browser_status.get("browser_open", False)}
