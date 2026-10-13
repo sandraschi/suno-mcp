@@ -1931,7 +1931,7 @@ wheels = [
 
 [[package]]
 name = "suno-mcp"
-version = "1.2.0"
+version = "2.0.0a1"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
