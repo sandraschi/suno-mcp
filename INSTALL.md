@@ -51,6 +51,27 @@ If you prefer not to use `just`:
    ```
 5. Open `http://localhost:10883` or the frontend URL.
 
+### Suno CLI (v2, required for generation)
+
+suno-mcp v2 calls the community **[paperfoot/suno-cli](https://github.com/paperfoot/suno-cli)** binary. It is **not** installed by `uv sync`.
+
+1. Download a release for Windows from [paperfoot/suno-cli releases](https://github.com/paperfoot/suno-cli/releases) (or `cargo install suno`).
+2. Put `suno.exe` on PATH, or set `SUNO_CLI_PATH` to the full path.
+3. Authenticate once:
+
+   ```powershell
+   suno auth --login
+   suno doctor
+   ```
+
+4. Verify the stack:
+
+   ```powershell
+   just doctor
+   ```
+
+See [docs/UNOFFICIAL.md](docs/UNOFFICIAL.md) and [docs/SUNO_MCP_V2_PLAN.md](docs/SUNO_MCP_V2_PLAN.md).
+
 ---
 
 ## ❓ Troubleshooting
@@ -60,6 +81,8 @@ If you prefer not to use `just`:
 | `just` not found | Install via `winget install Casey.Just`, `scoop install just`, or `brew install just` |
 | Port conflict | Run `just kill-all` to clear fleet ports (10700–11000) |
 | Dependencies out of sync | `uv sync --all-extras` |
+| `CLI_MISSING` / `suno` not found | Install paperfoot suno-cli; set `SUNO_CLI_PATH` |
+| `suno_auth_status` fails | Run `suno auth --login` then `just doctor` |
 | Something else | [Open a GitHub issue](https://github.com/sandraschi/suno-mcp/issues) |
 
 ---

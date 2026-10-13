@@ -1,8 +1,8 @@
 {
   "manifest_version": "0.2",
   "name": "suno-mcp",
-  "version": "1.2.0",
-  "description": "MCP server: Playwright automation against suno.com (fragile); DOM recon tools; no official Suno API",
+  "version": "2.0.0-alpha.1",
+  "description": "MCP server for Suno via paperfoot suno-cli (v2); legacy Playwright optional",
   "author": { "name": "sandraschi" },
   "server": {
     "type": "python",
@@ -12,11 +12,16 @@
       "args": ["run","--directory","${PWD}","python","-m","suno_mcp"],
       "env": {
         "PYTHONPATH": "${PWD}/src",
-        "PYTHONUNBUFFERED": "1"
+        "PYTHONUNBUFFERED": "1",
+        "SUNO_BACKEND": "cli"
       }
     }
   },
   "tools": [
+    { "name": "suno_auth_status", "description": "CLI doctor + credits" },
+    { "name": "suno_generate", "description": "CLI generate with download" },
+    { "name": "suno_describe", "description": "CLI describe generation" },
+    { "name": "suno_write_scaffold", "description": "CLI write lyric scaffold" },
     { "name": "suno_open_browser", "description": "suno_open_browser" },
     { "name": "suno_login", "description": "suno_login" },
     { "name": "suno_generate_track", "description": "suno_generate_track" },
