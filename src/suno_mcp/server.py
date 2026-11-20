@@ -138,7 +138,13 @@ fastapi_app = FastAPI(
 # CORS middleware
 fastapi_app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=[
+        "http://127.0.0.1:10882",
+        "http://localhost:10882",
+        "tauri://localhost",
+        "http://tauri.localhost",
+        "https://tauri.localhost",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -354,9 +360,7 @@ async def execute_tool(tool_name: str, request: ToolRequest):
 
 
 # Tool execution helpers
-_CLI_TOOL_NAMES = frozenset(
-    {"suno_auth_status", "suno_generate", "suno_describe", "suno_write_scaffold"}
-)
+_CLI_TOOL_NAMES = frozenset({"suno_auth_status", "suno_generate", "suno_describe", "suno_write_scaffold"})
 
 
 async def _handle_cli_tool(tool_name: str, args: dict[str, Any]) -> str:
@@ -1033,9 +1037,9 @@ def main_api():
 
     fastapi_app.start_time = time.time()
 
-    logging.info("Starting FastAPI server on http://0.0.0.0:3000")
-    logging.info("API Docs: http://0.0.0.0:3000/api/docs")
-    uvicorn.run(fastapi_app, host="0.0.0.0", port=3000)
+    logging.info("Starting FastAPI server on http://127.0.0.1:10883")
+    logging.info("API Docs: http://127.0.0.1:10883/api/docs")
+    uvicorn.run(fastapi_app, host="127.0.0.1", port=10883)
 
 
 if __name__ == "__main__":
